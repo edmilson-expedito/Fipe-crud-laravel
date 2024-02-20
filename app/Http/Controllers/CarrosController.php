@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Carro;
 use Illuminate\Http\Request;
 
 class CarrosController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->carro = new Carro();
+    }
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +19,8 @@ class CarrosController extends Controller
      */
     public function index()
     {
-        //
+        $cars = Carro::all();
+        return view("carros", ['carros' => $cars]);
     }
 
     /**
@@ -23,7 +30,7 @@ class CarrosController extends Controller
      */
     public function create()
     {
-        //
+        return view('carro_create');
     }
 
     /**
@@ -34,7 +41,19 @@ class CarrosController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $created = Carro::create([
+            'Fipe' => $request->input('Fipe'),
+            'Marca' => $request->input('Marca'),
+            'Modelo' => $request->input('Modelo'),
+            'Ano' => $request->input('Ano'),
+            'Preco' => $request->input('Preco'),
+        ]);
+
+        if ($created) {
+            return redirect()->back()->with('success', 'Cadastrado com sucesso');
+        }
+
+        return redirect()->back()->with('error', 'Erro ao cadastrar as informações');
     }
 
     /**
@@ -43,9 +62,9 @@ class CarrosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Carro $carro)
     {
-        //
+        return view('carro_show', ['carro' => $carro]);
     }
 
     /**
@@ -54,9 +73,9 @@ class CarrosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Carro $carro)
     {
-        //
+        return view('carro_edit', ['carro' => $carro]);
     }
 
     /**
@@ -68,7 +87,14 @@ class CarrosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $data = $request->only(['Fipe', 'Marca', 'Modelo', 'Ano', 'Preco']);
+
+        $updated = $this->carro->where('id', $id)->update($data);
+
+        if ($updated) {
+            return redirect()->back()->with('success', 'Informações atualizadas com sucesso');
+        }
+        return redirect()->back()->with('error', 'Erro ao realizar a atualização dos dados');
     }
 
     /**
@@ -79,6 +105,8 @@ class CarrosController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $this->carro->where('id', $id)->delete();
+
+        return redirect()->route('carros.index')->with('success', 'Dados deletados com sucesso');
     }
 }
